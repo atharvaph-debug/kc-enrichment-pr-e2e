@@ -1,0 +1,30 @@
+scope: entryGroup.dataplex-demo.us-central1.democontextset
+snapshot:
+  entries:
+  - dataplex-types.global.document
+  - dataplex-types.global.entrygroup
+  - dataplex-types.global.generic
+  aspects:
+  - dataplex-types.global.document
+  - dataplex-types.global.generic
+  - dataplex-types.global.overview
+  - dataplex-types.global.queries
+publishing:
+  entries:
+  - dataplex-types.global.document
+  - dataplex-types.global.entrygroup
+  - dataplex-types.global.generic
+  aspects:
+  - dataplex-types.global.document
+  - dataplex-types.global.generic
+  - dataplex-types.global.overview
+  - dataplex-types.global.queries
+reference:
+  scope: bq-dataset.dataplex-demo.andrew_demo1
+  snapshot:
+    entries:
+    - dataplex-types.global.bigquery-table
+    aspects:
+    - dataplex-types.global.schema
+    - dataplex-types.global.overview
+layout: okf
