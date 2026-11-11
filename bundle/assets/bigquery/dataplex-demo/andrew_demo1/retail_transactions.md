@@ -13,7 +13,7 @@ x-kcmd:
   name: assets/bigquery/dataplex-demo/andrew_demo1/retail_transactions
   id: assets/bigquery/dataplex-demo/andrew_demo1/retail_transactions
   type: dataplex-types.global.document
-  category: miscellaneous
+  category: warehouse-tables
   resource:
     name: projects/dataplex-demo/locations/us/entryGroups/@bigquery/entries/bigquery.googleapis.com/projects/dataplex-demo/datasets/andrew_demo1/tables/retail_transactions
     displayName: retail_transactions
@@ -23,59 +23,54 @@ x-kcmd:
     dataplex-types.global.document:
       type: table-context
       job:
-        name: enrichment-agent/enrich-3a12f021f22b4475
-        runTime: '2026-11-11T23:15:25Z'
+        name: enrichment-agent/enrich-d44fbe23b3bf415e
+        runTime: '2026-11-11T23:19:21Z'
 ---
 # retail_transactions Overview
 
-The `retail_transactions` table captures retail sales orders and their end-to-end lifecycle events, spanning initial purchase checkout, payment processing, outbound logistics, and downstream post-purchase activities such as returns and product exchanges. Each record represents an order transaction associated with a customer, product, and retail store location, capturing the transaction's financial amounts, fulfillment options, and reverse logistics costs.
+The `retail_transactions` table stores line-level retail transaction records, tracking customer purchases across retail stores along with fulfillment, payment, and post-purchase merchandise processing [1]. It models the complete purchase lifecycle from initial order placement through payment settlement, outbound shipping, customer returns, and replacement exchanges [1].
 
 ## Purpose
 
-The primary purpose of `retail_transactions` is to serve as an operational and analytical store of retail order transactions. It tracks sales volumes and financial metrics (order value, sales tax, and applied discounts) alongside complete post-order fulfillment states, including payment status, shipping methods, customer returns, and replacement exchange workflows. Metadata indicates that the table currently holds 0 rows [1].
+The primary purpose of `retail_transactions` is to serve as a consolidated operational and reporting log for retail sales events [1]. It captures:
+- Transaction identification, customer links, product identifiers, and store locations.
+- Financial metrics including transaction totals, taxes, promotional discounts, and fulfillment costs.
+- Payment processing details, capturing payment types, numerical payment method codes, and transaction settlement statuses.
+- Fulfillment logistics covering outbound shipping methods and delivery expenses.
+- Reverse logistics workflows, tracking return events, reasons, shipping fees, product exchanges, and exchange return statuses.
 
 ## Columns & Metrics
 
-### Core Identifiers
-- **`transaction_id`** (`STRING`): Unique identifier for the retail transaction (documented with description `asdqweasdqwe123uniquedescription`). Represents the transaction key for the purchase record.
-- **`customer_id`** (`STRING`): Identifier of the customer who completed the retail purchase.
-- **`product_id`** (`STRING`): Identifier of the primary product purchased within the transaction.
-- **`store_id`** (`STRING`): Identifier of the physical retail store or sales location where the transaction took place.
-
-### Financial Amounts & Discounts
-- **`total_price`** (`NUMERIC`): Total gross monetary amount charged for the transaction.
-- **`tax`** (`NUMERIC`): Monetary tax amount assessed and collected for the transaction.
-- **`discount`** (`NUMERIC`): Monetary value of promotional discounts or deductions applied against the purchase price.
-
-### Payment Details
-- **`payment_type`** (`STRING`): Classification or category of tender utilized for the transaction (e.g., credit card, cash, gift card).
-- **`payment_method`** (`FLOAT`): Numerical code or identifier representing the specific payment mechanism or channel.
-- **`payment_status`** (`STRING`): Processing state of the transaction's payment settlement.
-
-### Outbound Fulfillment & Shipping
-- **`shipping_method`** (`STRING`): Carrier, speed, or fulfillment mode designated for outbound delivery to the customer.
-- **`shipping_cost`** (`NUMERIC`): Cost or fee charged to fulfill and ship the purchased product.
-
-### Returns & Reverse Logistics
-- **`return_status`** (`STRING`): Lifecycle or processing status of a customer product return request.
-- **`return_reason`** (`STRING`): Customer-provided explanation or categorical reason for initiating the product return.
-- **`return_shipping_cost`** (`NUMERIC`): Shipping and freight charges incurred to transport the returned item back to inventory.
-
-### Exchanges & Replacements
-- **`exchange_status`** (`STRING`): Operational status of a requested product replacement or exchange.
-- **`exchange_product_id`** (`STRING`): Identifier of the new or alternate product requested or issued to replace the original purchase.
-- **`exchange_shipping_cost`** (`NUMERIC`): Shipping cost incurred to dispatch the replacement item to the customer.
-- **`exchange_return_status`** (`STRING`): Processing status of the original item returned as part of an exchange workflow.
-- **`exchange_return_reason`** (`STRING`): Reason recorded for exchanging the original product.
-- **`exchange_return_shipping_cost`** (`NUMERIC`): Shipping cost incurred to return the original item being replaced in an exchange.
+- **transaction_id** (`STRING`): Unique identifier assigned to the retail transaction record (annotated in schema metadata as `asdqweasdqwe123uniquedescription`) [1].
+- **customer_id** (`STRING`): Unique identifier representing the individual customer who completed the purchase [1].
+- **product_id** (`STRING`): Identifier for the purchased retail product [1].
+- **store_id** (`STRING`): Identifier for the brick-and-mortar store or retail channel where the transaction occurred [1].
+- **total_price** (`NUMERIC`): Total gross monetary amount billed for the transaction, expressed in transactional currency units [1].
+- **tax** (`NUMERIC`): Total sales tax or value-added tax applied to the transaction [1].
+- **discount** (`NUMERIC`): Total promotional discount amount deducted from the gross purchase price [1].
+- **payment_type** (`STRING`): Classification of the payment instrument utilized (e.g., credit card, cash, gift card) [1].
+- **payment_method** (`FLOAT`): Numeric code or identifier representing the specific payment method used [1].
+- **payment_status** (`STRING`): Settlement or processing state of the payment (e.g., authorized, completed, failed) [1].
+- **shipping_method** (`STRING`): Fulfillment or carrier service tier selected for outbound shipping (e.g., standard, express) [1].
+- **shipping_cost** (`NUMERIC`): Outbound shipping and handling fee charged for delivering the purchased merchandise [1].
+- **return_status** (`STRING`): Processing status of an item return initiated for the transaction (e.g., pending, approved, refunded) [1].
+- **return_reason** (`STRING`): Stated customer justification for returning the purchased item [1].
+- **return_shipping_cost** (`NUMERIC`): Shipping cost incurred to transport returned items back to the warehouse or store [1].
+- **exchange_status** (`STRING`): Current lifecycle status of an exchange request linked to the original purchase [1].
+- **exchange_product_id** (`STRING`): Identifier of the substitute or replacement product selected as part of an exchange [1].
+- **exchange_shipping_cost** (`NUMERIC`): Shipping cost incurred to dispatch the replacement exchange item [1].
+- **exchange_return_status** (`STRING`): Logistics status of the original item being returned specifically in connection with an exchange [1].
+- **exchange_return_reason** (`STRING`): Specific reason provided for returning the item in order to execute an exchange [1].
+- **exchange_return_shipping_cost** (`NUMERIC`): Freight or postal charge incurred to return the original item being exchanged [1].
 
 ## Usage
 
-This table supports several analytical workflows across retail operations and customer behavior:
-- **Revenue & Sales Performance**: Aggregating `total_price`, `discount`, and `tax` by `store_id`, `product_id`, or `customer_id` allows analysts to evaluate gross and net retail sales, discount penetration, and regional store performance.
-- **Fulfillment & Logistics Cost Analysis**: Comparing outbound `shipping_cost` against delivery choices in `shipping_method` helps identify logistics margins and delivery carrier utilization.
-- **Reverse Logistics & Customer Satisfaction**: Analyzing `return_status`, `return_reason`, and `return_shipping_cost` alongside exchange fields (`exchange_status`, `exchange_product_id`, `exchange_return_reason`) highlights problematic products with high defect or return rates, as well as the total operational overhead of managing return and replacement shipments.
-- **Payment Operations**: Evaluating `payment_status` across various `payment_type` and `payment_method` values assists in monitoring transaction settlement rates and payment failure trends.
+This table is structured for retail analytics, fulfillment tracking, and financial reconciliation:
+- **Sales and Revenue Reporting**: Aggregate gross and net sales across products, stores, and customers by evaluating `total_price`, `discount`, and `tax`.
+- **Fulfillment and Reverse Logistics Analysis**: Monitor logistics expenses across outbound (`shipping_cost`), inbound returns (`return_shipping_cost`), and replacement dispatches (`exchange_shipping_cost`, `exchange_return_shipping_cost`) to evaluate net order profitability.
+- **Customer Return & Exchange Insights**: Analyze return rates and common drivers by joining transaction records on `return_reason` and `exchange_return_reason`.
+
+Within the `andrew_demo1` dataset, sibling tables such as `taxi_zone_geom` provide geographic boundaries for municipal transportation analysis and do not join or relate to this retail transaction entity.
 
 ## Table Info
 
