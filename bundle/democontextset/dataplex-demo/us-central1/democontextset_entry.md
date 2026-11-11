@@ -6,21 +6,21 @@ x-kcmd:
   name: democontextset/dataplex-demo/us-central1/democontextset_entry
   type: dataplex-types.global.entrygroup
 ---
-# Retail Transactions Knowledge Base
+# Dataset Analytics and Operations
 
-The Retail Transactions Knowledge Base (`democontextset`) provides business documentation, asset metadata, and sample SQL queries covering the end-to-end retail sales order lifecycle. It supports reporting and analysis across checkout events, payment processing, fulfillment logistics, and post-purchase returns or product exchanges to evaluate sales volume, financial metrics, and reverse logistics performance. This collection is intended for data analysts, analytics engineers, and business stakeholders querying retail transactional data.
+The **Dataset Analytics and Operations** entry group (`democontextset`) is a catalog and operational knowledge base designed to support incrementally updating the context set. It serves data practitioners, analysts, and operators by organizing BigQuery table overlays alongside operational documentation and analytical guidelines.
 
-## Core Data Assets
+## Contents and Navigation
 
-The primary table documented in this group is `retail_transactions`. Its grain is one record per sales order transaction, identified by `transaction_id` and linked to customer, product, and physical store location dimensions. 
+The knowledge base is structured into technical assets and operational reference documents:
 
-> **Data Notice:** According to current warehouse metadata, the `retail_transactions` table contains 0 rows.
+* **Assets (`catalog/assets`)**: Houses table overlays accessible via the path format `assets/bigquery/<project>/<dataset>/<table>`. Dataset entries serve as their own indexes; retrieve a specific dataset entry to identify the individual tables it contains.
+* **Documents (`catalog/documents`)**: Contains cross-cutting operational and analytical reference pages, focusing on analytical guidelines and pitfalls for updating the context set.
+* **Context Set Index (`democontextset`)**: Root-level index managing the context set configuration and associated materials.
 
-## Structure and Navigation
+### Lookup Guidance
 
-The entry group is organized into two top-level directories:
-
-* **`catalog/assets`**: Technical data assets and table overlays formatted as `assets/bigquery/<project>/<dataset>/<table>`. Dataset entries function as their own indexes; look up a dataset entry directly to view the tables it contains.
-* **`catalog/documents`**: Cross-cutting reference documentation, including business domain overviews and curated sample SQL queries.
-
-When querying this catalog, looking up an entry ID returns only the specific entry named (parent entries do not automatically include child entities). To explore the catalog, search for the target topic or dataset, then look up the specific entry IDs returned by the search.
+A lookup returns only the specific entry requested; parent entries do not include child entries in their responses. To navigate the catalog effectively:
+1. Search to identify the target dataset, tier, or document path.
+2. Look up the specific entry by its ID to inspect its schema, overlays, or contents.
+3. Expect a typical inquiry to require roughly three searches and three lookups to move from a high-level dataset or topic down to the underlying entries.
