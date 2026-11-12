@@ -1,0 +1,30 @@
+scope: entryGroup.jasoneliu-joonix-test-project.us-central1.atharva-github-pr-e2e
+snapshot:
+  entries:
+  - dataplex-types.global.document
+  - dataplex-types.global.entrygroup
+  - dataplex-types.global.generic
+  aspects:
+  - dataplex-types.global.document
+  - dataplex-types.global.generic
+  - dataplex-types.global.overview
+  - dataplex-types.global.queries
+publishing:
+  entries:
+  - dataplex-types.global.document
+  - dataplex-types.global.entrygroup
+  - dataplex-types.global.generic
+  aspects:
+  - dataplex-types.global.document
+  - dataplex-types.global.generic
+  - dataplex-types.global.overview
+  - dataplex-types.global.queries
+reference:
+  scope: bq-dataset.dataplex-demo.andrew_demo1
+  snapshot:
+    entries:
+    - dataplex-types.global.bigquery-table
+    aspects:
+    - dataplex-types.global.schema
+    - dataplex-types.global.overview
+layout: okf
