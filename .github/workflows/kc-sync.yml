@@ -1,0 +1,89 @@
+name: Knowledge Catalog OKF Sync
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER || 'projects/309161251569/locations/global/workloadIdentityPools/github-actions-pool/providers/atharva-github-pr-e2e' }}
+  GCP_SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT || 'kc-metadata-ci@jasoneliu-joonix-test-project.iam.gserviceaccount.com' }}
+  GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+  GCP_LOCATION: ${{ vars.GCP_LOCATION }}
+  OKF_SUBPATH: ${{ vars.OKF_SUBPATH || '.' }}
+  KCMD_VERSION: ${{ vars.KCMD_VERSION || '0.2.5' }}
+
+jobs:
+  validate-pr:
+    name: Validate OKF Bundle (Dry Run)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR Branch
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate OKF Bundle via kcmd dry-run
+        run: |
+          set -euo pipefail
+          SUBPATH="${OKF_SUBPATH}"
+          while IFS= read -r -d '' manifest; do
+            ws_dir="$(dirname "${manifest}")"
+            scope_line="$(awk -F': *' '/^scope:/{print $2; exit}' "${manifest}" | tr -d '"' | tr -d "'")"
+            IFS='.' read -r _scope_type scope_proj scope_loc _rest <<< "${scope_line}"
+            export CLOUDSDK_CORE_PROJECT="${GCP_PROJECT_ID:-${scope_proj:-}}"
+            export CLOUDSDK_COMPUTE_REGION="${GCP_LOCATION:-${scope_loc:-global}}"
+            echo "Validating OKF workspace in ${ws_dir} (project=${CLOUDSDK_CORE_PROJECT}, region=${CLOUDSDK_COMPUTE_REGION})..."
+            (cd "${ws_dir}" && npx --yes "@google-cloud/kcmd@${KCMD_VERSION}" push --dry-run)
+          done < <(find "${SUBPATH}" -name "catalog.yaml" -print0)
+
+  publish-to-kc:
+    name: Publish Merged OKF Bundle to Knowledge Catalog
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: kc-sync-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Push OKF Bundle to Knowledge Catalog
+        run: |
+          set -euo pipefail
+          SUBPATH="${OKF_SUBPATH}"
+          while IFS= read -r -d '' manifest; do
+            ws_dir="$(dirname "${manifest}")"
+            scope_line="$(awk -F': *' '/^scope:/{print $2; exit}' "${manifest}" | tr -d '"' | tr -d "'")"
+            IFS='.' read -r _scope_type scope_proj scope_loc _rest <<< "${scope_line}"
+            export CLOUDSDK_CORE_PROJECT="${GCP_PROJECT_ID:-${scope_proj:-}}"
+            export CLOUDSDK_COMPUTE_REGION="${GCP_LOCATION:-${scope_loc:-global}}"
+            echo "Pushing OKF workspace in ${ws_dir} to Knowledge Catalog (project=${CLOUDSDK_CORE_PROJECT}, region=${CLOUDSDK_COMPUTE_REGION})..."
+            (cd "${ws_dir}" && npx --yes "@google-cloud/kcmd@${KCMD_VERSION}" push)
+          done < <(find "${SUBPATH}" -name "catalog.yaml" -print0)
